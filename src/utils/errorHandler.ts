@@ -2,10 +2,15 @@ import { ErrorRequestHandler } from "express";
 import HTTP_CODES from "../constants/httpCodes";
 import { ZodError } from "zod";
 import ApiError from "./apiError";
+import { clearAuthCookies, REFRESH_PATH } from "./cookies";
 
 const errorHandler: ErrorRequestHandler = async (error, req, res, _) => {
   console.log(`Path: ${req.path} ---- Method: ${req.method}`);
   console.log(error);
+
+  if (req.path === REFRESH_PATH) {
+    clearAuthCookies(res);
+  }
 
   if (error instanceof ZodError) {
     res

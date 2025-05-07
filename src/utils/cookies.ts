@@ -1,7 +1,7 @@
 import { CookieOptions, Response } from "express";
 import { NODE_ENV } from "../constants/env";
 
-const REFRESH_PATH = "/auth/refresh";
+export const REFRESH_PATH = "/auth/refresh";
 
 const defaultAuthCookieOptions: CookieOptions = {
   sameSite: "strict",
@@ -23,5 +23,17 @@ export const setAuthCookies = (
       ...defaultAuthCookieOptions,
       expires: new Date(Date.now() + 30 * 60 * 60 * 1000),
       path: REFRESH_PATH,
+    });
+};
+
+export const clearAuthCookies = (res: Response) => {
+  return res
+    .clearCookie("accessToken", {
+      ...defaultAuthCookieOptions,
+      expires: new Date(Date.now() + 15 * 60 * 1000),
+    })
+    .clearCookie("refreshToken", {
+      ...defaultAuthCookieOptions,
+      expires: new Date(Date.now() + 30 * 60 * 60 * 1000),
     });
 };
