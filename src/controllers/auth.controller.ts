@@ -10,8 +10,13 @@ import { clearAuthCookies, setAuthCookies } from "../utils/cookies";
 import ApiError from "../utils/apiError";
 import ERROR_CODES from "../constants/errorCodes";
 import jwt, { JsonWebTokenError } from "jsonwebtoken";
-import { REFRESH_TOKEN_SECRET } from "../constants/env";
-import { RefreshTokenPayload, verifyToken } from "../utils/jwt";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../constants/env";
+import {
+  AccessTokenPayload,
+  RefreshTokenPayload,
+  verifyToken,
+} from "../utils/jwt";
+import UserModel from "../models/user.model";
 
 export const registerHandler = asyncHandler(async (req, res) => {
   // validate a request
@@ -38,6 +43,7 @@ export const loginHandler = asyncHandler(async (req, res) => {
 export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
   // validate a request
   const refreshToken = req.cookies.refreshToken as string | undefined;
+  console.log(refreshToken);
   if (!refreshToken) {
     throw new ApiError(
       HTTP_CODES.UNAUTHORIZED,
@@ -55,4 +61,44 @@ export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
   setAuthCookies(res, accessToken, newRefreshToken)
     .status(HTTP_CODES.OK)
     .json({ message: "Access token refreshed successfully." });
+});
+
+export const logoutHandler = asyncHandler(async (req, res) => {
+  // validate a request
+  const accessToken = req.cookies.accessToken as string | undefined;
+  if (!accessToken) {
+    throw new ApiError(
+      HTTP_CODES.UNAUTHORIZED,
+      "Access token is required.",
+      ERROR_CODES.INVALID_ACCESS_TOKEN
+    );
+  }
+
+  const { payload } = verifyToken<AccessTokenPayload>(
+    accessToken,
+    ACCESS_TOKEN_SECRET
+  );
+
+  if (!payload) {
+    throw new ApiError(
+      HTTP_CODES.UNAUTHORIZED,
+      "Invalid or expired access token.",
+      ERROR_CODES.INVALID_ACCESS_TOKEN
+    );
+  }
+
+  const user = await UserModel.findById(payload.userId);
+
+  if (!user) {
+    throw new ApiError(
+      HTTP_CODES.UNAUTHORIZED,
+      "Invalid or expired access token.",
+      ERROR_CODES.INVALID_ACCESS_TOKEN
+    );
+  }
+
+  // send a response
+  clearAuthCookies(res)
+    .status(HTTP_CODES.OK)
+    .json({ message: "Logout successfully." });
 });

@@ -86,6 +86,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
   }
 
   const user = await UserModel.findById(payload.userId);
+
   if (!user) {
     throw new ApiError(
       HTTP_CODES.UNAUTHORIZED,
@@ -94,10 +95,10 @@ export const refreshAccessToken = async (refreshToken: string) => {
     );
   }
 
-  const accessToken = jwt.sign({ id: user._id }, ACCESS_TOKEN_SECRET, {
+  const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, {
     expiresIn: "15m",
   });
-  const newRefreshToken = jwt.sign({ id: user._id }, REFRESH_TOKEN_SECRET, {
+  const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, {
     expiresIn: "30d",
   });
 

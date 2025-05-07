@@ -35,5 +35,6 @@ export const clearAuthCookies = (res: Response) => {
     .clearCookie("refreshToken", {
       ...defaultAuthCookieOptions,
       expires: new Date(Date.now() + 30 * 60 * 60 * 1000),
+      path: REFRESH_PATH,
     });
 };
