@@ -1,5 +1,5 @@
-import ERROR_CODES from "src/constants/errorCodes";
-import HTTP_CODES from "src/constants/httpCodes";
+import ERROR_CODES from "../constants/errorCodes";
+import HTTP_CODES from "../constants/httpCodes";
 
 class ApiError extends Error {
   constructor(
