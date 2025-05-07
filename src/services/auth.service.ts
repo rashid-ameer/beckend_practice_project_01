@@ -21,6 +21,14 @@ export const registerUser = async ({
   }
   // store the user in the database
   const user = await UserModel.create({ email, username, password });
+
+  if (!user) {
+    throw new ApiError(
+      HTTP_CODES.INTERNAL_SERVER_ERROR,
+      "Failed to create user."
+    );
+  }
+
   // create access and refresh tokens
   const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, {
     expiresIn: "15m",
