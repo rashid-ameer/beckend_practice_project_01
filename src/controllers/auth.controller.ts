@@ -43,7 +43,6 @@ export const loginHandler = asyncHandler(async (req, res) => {
 export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
   // validate a request
   const refreshToken = req.cookies.refreshToken as string | undefined;
-  console.log(refreshToken);
   if (!refreshToken) {
     throw new ApiError(
       HTTP_CODES.UNAUTHORIZED,
