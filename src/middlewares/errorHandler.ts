@@ -1,8 +1,8 @@
 import { ErrorRequestHandler } from "express";
 import HTTP_CODES from "../constants/httpCodes";
 import { ZodError } from "zod";
-import ApiError from "./apiError";
-import { clearAuthCookies, REFRESH_PATH } from "./cookies";
+import ApiError from "../utils/apiError";
+import { clearAuthCookies, REFRESH_PATH } from "../utils/cookies";
 
 const errorHandler: ErrorRequestHandler = async (error, req, res, _) => {
   console.log(`Path: ${req.path} ---- Method: ${req.method}`);

@@ -63,40 +63,7 @@ export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
     .json({ message: "Access token refreshed successfully." });
 });
 
-export const logoutHandler = asyncHandler(async (req, res) => {
-  // validate a request
-  const accessToken = req.cookies.accessToken as string | undefined;
-  if (!accessToken) {
-    throw new ApiError(
-      HTTP_CODES.UNAUTHORIZED,
-      "Access token is required.",
-      ERROR_CODES.INVALID_ACCESS_TOKEN
-    );
-  }
-
-  const { payload } = verifyToken<AccessTokenPayload>(
-    accessToken,
-    ACCESS_TOKEN_SECRET
-  );
-
-  if (!payload) {
-    throw new ApiError(
-      HTTP_CODES.UNAUTHORIZED,
-      "Invalid or expired access token.",
-      ERROR_CODES.INVALID_ACCESS_TOKEN
-    );
-  }
-
-  const user = await UserModel.findById(payload.userId);
-
-  if (!user) {
-    throw new ApiError(
-      HTTP_CODES.UNAUTHORIZED,
-      "Invalid or expired access token.",
-      ERROR_CODES.INVALID_ACCESS_TOKEN
-    );
-  }
-
+export const logoutHandler = asyncHandler(async (_, res) => {
   // send a response
   clearAuthCookies(res)
     .status(HTTP_CODES.OK)
