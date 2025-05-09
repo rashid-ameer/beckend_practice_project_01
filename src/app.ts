@@ -1,10 +1,12 @@
 import express from "express";
+import errorHandler from "./middlewares/errorHandler";
+import authenticate from "./middlewares/authenticate";
 import HTTP_CODES from "./constants/httpCodes";
+import userRoutes from "./routes/user.route";
+import { APP_ORIGIN } from "./constants/env";
 import authRoutes from "./routes/auth.route";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { APP_ORIGIN } from "./constants/env";
-import errorHandler from "./middlewares/errorHandler";
 
 const app = express();
 
@@ -20,6 +22,9 @@ app.use(cookieParser());
 
 // routes
 app.use("/auth", authRoutes);
+
+// protected routes
+app.use("/users", authenticate, userRoutes);
 
 // health check
 app.use("/", (_, res) => {

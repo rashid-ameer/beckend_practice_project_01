@@ -1,10 +1,10 @@
 import { ACCESS_TOKEN_SECRET } from "../constants/env";
+import { AccessTokenPayload, verifyToken } from "../utils/jwt";
+import { getUserById } from "../services/user.service";
 import ERROR_CODES from "../constants/errorCodes";
 import HTTP_CODES from "../constants/httpCodes";
-import UserModel from "../models/user.model";
-import ApiError from "../utils/apiError";
 import asyncHandler from "../utils/asyncHandler";
-import { AccessTokenPayload, verifyToken } from "../utils/jwt";
+import ApiError from "../utils/apiError";
 
 const authenticate = asyncHandler(async (req, _, next) => {
   const accessToken = req.cookies.accessToken as string | undefined;
@@ -29,7 +29,8 @@ const authenticate = asyncHandler(async (req, _, next) => {
     );
   }
 
-  const user = await UserModel.findById(payload.userId);
+  const user = await getUserById(payload.userId);
+
   if (!user) {
     throw new ApiError(
       HTTP_CODES.UNAUTHORIZED,
