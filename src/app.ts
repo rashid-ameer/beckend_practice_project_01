@@ -7,6 +7,7 @@ import { APP_ORIGIN } from "./constants/env";
 import authRoutes from "./routes/auth.route";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import blogRoutes from "./routes/blog.route";
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/auth", authRoutes);
 
 // protected routes
 app.use("/users", authenticate, userRoutes);
+app.use("/blogs", authenticate, blogRoutes);
 
 // health check
 app.use("/", (_, res) => {
