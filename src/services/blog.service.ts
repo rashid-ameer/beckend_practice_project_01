@@ -18,3 +18,43 @@ export const createBlog = async (data: CreateBlogParams) => {
   }
   return blog;
 };
+
+export const getBlogById = async (blogId: string) => {
+  return BlogModel.findById(blogId);
+};
+
+export const getBlogsByAuthorId = async (authorId: string) => {
+  return BlogModel.find({ author: authorId });
+};
+
+interface UpdatedBlogParams {
+  blogId: string;
+  title?: string;
+  content?: string;
+}
+export const updateBlog = async ({
+  blogId,
+  title,
+  content,
+}: UpdatedBlogParams) => {
+  const blog = await getBlogById(blogId);
+  if (!blog) {
+    throw new ApiError(HTTP_CODES.NOT_FOUND, "Blog not found.");
+  }
+
+  if (title) {
+    blog.title = title;
+  }
+  if (content) {
+    blog.content = content;
+  }
+
+  return blog.save();
+};
+
+export const deleteBlog = async (blogId: string) => {
+  const blog = await BlogModel.findByIdAndDelete(blogId);
+  if (!blog) {
+    throw new ApiError(HTTP_CODES.NOT_FOUND, "Blog not found.");
+  }
+};
