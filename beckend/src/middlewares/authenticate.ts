@@ -7,7 +7,8 @@ import UserModel from "../models/user.model";
 import ApiError from "../utils/apiError";
 
 const authenticate = asyncHandler(async (req, _, next) => {
-  const accessToken = req.cookies.accessToken as string | undefined;
+  // const accessToken = req.cookies.accessToken as string | undefined;
+  const accessToken = req.headers.authorization?.split(" ")[1];
 
   if (!accessToken) {
     throw new ApiError(

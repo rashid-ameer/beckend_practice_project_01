@@ -15,10 +15,10 @@ export const setAuthCookies = (
   refreshToken: string
 ) => {
   return res
-    .cookie("accessToken", accessToken, {
-      ...defaultAuthCookieOptions,
-      expires: new Date(Date.now() + 15 * 60 * 1000),
-    })
+    // .cookie("accessToken", accessToken, {
+    //   ...defaultAuthCookieOptions,
+    //   expires: new Date(Date.now() + 15 * 60 * 1000),
+    // })
     .cookie("refreshToken", refreshToken, {
       ...defaultAuthCookieOptions,
       expires: new Date(Date.now() + 30 * 60 * 60 * 1000),
@@ -28,10 +28,10 @@ export const setAuthCookies = (
 
 export const clearAuthCookies = (res: Response) => {
   return res
-    .clearCookie("accessToken", {
-      ...defaultAuthCookieOptions,
-      expires: new Date(Date.now() + 15 * 60 * 1000),
-    })
+    // .clearCookie("accessToken", {
+    //   ...defaultAuthCookieOptions,
+    //   expires: new Date(Date.now() + 15 * 60 * 1000),
+    // })
     .clearCookie("refreshToken", {
       ...defaultAuthCookieOptions,
       expires: new Date(Date.now() + 30 * 60 * 60 * 1000),

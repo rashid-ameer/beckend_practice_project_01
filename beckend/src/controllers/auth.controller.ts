@@ -9,14 +9,6 @@ import HTTP_CODES from "../constants/httpCodes";
 import { clearAuthCookies, setAuthCookies } from "../utils/cookies";
 import ApiError from "../utils/apiError";
 import ERROR_CODES from "../constants/errorCodes";
-import jwt, { JsonWebTokenError } from "jsonwebtoken";
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../constants/env";
-import {
-  AccessTokenPayload,
-  RefreshTokenPayload,
-  verifyToken,
-} from "../utils/jwt";
-import UserModel from "../models/user.model";
 
 export const registerHandler = asyncHandler(async (req, res) => {
   // validate a request
@@ -26,7 +18,10 @@ export const registerHandler = asyncHandler(async (req, res) => {
   // return response
   setAuthCookies(res, accessToken, refreshToken)
     .status(HTTP_CODES.CREATED)
-    .json({ message: "User registered successfully", user });
+    .json({
+      message: "User registered successfully",
+      data: { user, accessToken },
+    });
 });
 
 export const loginHandler = asyncHandler(async (req, res) => {
@@ -37,7 +32,7 @@ export const loginHandler = asyncHandler(async (req, res) => {
   // return response
   setAuthCookies(res, accessToken, refreshToken)
     .status(HTTP_CODES.OK)
-    .json({ message: "Login successfully.", user });
+    .json({ message: "Login successfully.", data: { user, accessToken } });
 });
 
 export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
@@ -59,7 +54,7 @@ export const refreshAccessTokenHandler = asyncHandler(async (req, res) => {
   // send a response
   setAuthCookies(res, accessToken, newRefreshToken)
     .status(HTTP_CODES.OK)
-    .json({ message: "Access token refreshed successfully." });
+    .json({ message: "Access token refreshed successfully.", accessToken });
 });
 
 export const logoutHandler = asyncHandler(async (_, res) => {
