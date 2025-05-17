@@ -1,40 +1,39 @@
-import { createContext, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import AuthContext from "../context/AuthContext";
 import api from "../config/api";
 import { useNavigate } from "react-router";
 
-export const AuthContext = createContext(undefined);
-
-function AuthProvider({ children }) {
+const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
-  const [user, setUser] = useState(null);
-  const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+
   const navigate = useNavigate();
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     try {
       setIsAuthenticating(true);
-      const res = await api.get("/users");
-      setUser(res.data.user);
-      setIsAuthenticated(true);
+      const res = await api.get("/auth/refresh");
+      setToken(res.data.accessToken);
     } catch (error) {
       console.log(error);
+      navigate("/login", { replace: true });
     } finally {
       setIsAuthenticating(false);
     }
-  };
+  }, [navigate]);
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [fetchUser]);
 
   useLayoutEffect(() => {
     const requestInterceptor = api.interceptors.request.use(
       (config) => {
-        config.headers["Authorization"] =
+        config.headers.Authorization =
           !config.retry && token
             ? `Bearer ${token}`
             : config.headers.Authorization;
+
         return config;
       },
       (error) => Promise.reject(error)
@@ -46,41 +45,39 @@ function AuthProvider({ children }) {
   }, [token]);
 
   useLayoutEffect(() => {
-    const refreshInterceptor = api.interceptors.response.use(
+    const responseInterceptor = api.interceptors.response.use(
       (res) => res,
       async (error) => {
         const originalRequest = error.config;
-        console.log("Response interceptors", error.response.data);
+
         if (error.response.data.errorCode === "INVALID_ACCESS_TOKEN") {
           try {
             const res = await api.get("/auth/refresh");
             setToken(res.data.accessToken);
+            console.log(res.data.accessToken);
             originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
             originalRequest.retry = true;
             return api(originalRequest);
           } catch {
             setToken(null);
-            navigate("/login", {
-              replace: true,
-              state: { from: window.location.pathname },
-            });
           }
         }
+
         return Promise.reject(error);
       }
     );
-
     return () => {
-      api.interceptors.response.eject(refreshInterceptor);
+      api.interceptors.response.eject(responseInterceptor);
     };
   }, [navigate]);
 
+  const isAuthenticated = !!token;
+
   return (
-    <AuthContext
-      value={{ token, user, isAuthenticating, setToken, isAuthenticated }}>
+    <AuthContext value={{ setToken, isAuthenticating, isAuthenticated }}>
       {children}
     </AuthContext>
   );
-}
+};
 
 export default AuthProvider;

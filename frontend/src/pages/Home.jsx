@@ -1,4 +1,8 @@
+import { useOutletContext } from "react-router";
+
 function Home() {
-  return <div>Home</div>;
+  const u = useOutletContext();
+
+  return <div>{JSON.stringify(u)}</div>;
 }
 export default Home;
