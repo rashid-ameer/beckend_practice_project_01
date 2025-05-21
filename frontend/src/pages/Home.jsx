@@ -1,8 +1,11 @@
-import { useOutletContext } from "react-router";
+import { NavLink,  } from "react-router";
 
 function Home() {
-  const u = useOutletContext();
+  
 
-  return <div>{JSON.stringify(u)}</div>;
+  return <div>
+
+    <NavLink to="/about">About</NavLink>
+  </div>;
 }
 export default Home;

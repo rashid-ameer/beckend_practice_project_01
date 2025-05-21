@@ -4,6 +4,8 @@ import useAuth from "../hooks/useAuth";
 function ProtectedRoute() {
   const { isAuthenticated, isAuthenticating } = useAuth();
 
+  console.log("I ran ProtectedRoute");
+
   if (isAuthenticating) {
     return <div>Loading....</div>;
   }

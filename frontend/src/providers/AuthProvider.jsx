@@ -1,30 +1,31 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import AuthContext from "../context/AuthContext";
-import api from "../config/api";
 import { useNavigate } from "react-router";
+import api from "../config/api";
 
 const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const isRefreshing = useRef(false);
+  const refreshQueue = useRef([]);
 
   const navigate = useNavigate();
 
-  const fetchUser = useCallback(async () => {
-    try {
-      setIsAuthenticating(true);
-      const res = await api.get("/auth/refresh");
-      setToken(res.data.accessToken);
-    } catch (error) {
-      console.log(error);
-      navigate("/login", { replace: true });
-    } finally {
-      setIsAuthenticating(false);
-    }
-  }, [navigate]);
-
   useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setIsAuthenticating(true);
+        const res = await api.get("/auth/refresh");
+        setToken(res.data.accessToken);
+      } catch (error) {
+        console.log(error);
+        navigate("/login", { replace: true });
+      } finally {
+        setIsAuthenticating(false);
+      }
+    };
     fetchUser();
-  }, [fetchUser]);
+  }, []);
 
   useLayoutEffect(() => {
     const requestInterceptor = api.interceptors.request.use(
@@ -40,6 +41,7 @@ const AuthProvider = ({ children }) => {
     );
 
     return () => {
+      console.log("AuthProvider");
       api.interceptors.request.eject(requestInterceptor);
     };
   }, [token]);
@@ -51,15 +53,32 @@ const AuthProvider = ({ children }) => {
         const originalRequest = error.config;
 
         if (error.response.data.errorCode === "INVALID_ACCESS_TOKEN") {
-          try {
-            const res = await api.get("/auth/refresh");
-            setToken(res.data.accessToken);
-            originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
-            originalRequest.retry = true;
-            return api(originalRequest);
-          } catch {
-            setToken(null);
+          if (!isRefreshing.current) {
+            isRefreshing.current = true;
+
+            try {
+              const res = await api.get("/auth/refresh");
+              const token = res.data.accessToken;
+              refreshQueue.current.forEach((callback) => callback(token));
+              refreshQueue.current = [];
+              setToken(token);
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              originalRequest.retry = true;
+              return api(originalRequest);
+            } catch {
+              refreshQueue.current = [];
+              setToken(null);
+              navigate("/login", { replace: true });
+            }
           }
+
+          return new Promise((resolve) => {
+            refreshQueue.current.push((token) => {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+              originalRequest.retry = true;
+              return resolve(api(originalRequest));
+            });
+          });
         }
 
         return Promise.reject(error);
@@ -68,7 +87,7 @@ const AuthProvider = ({ children }) => {
     return () => {
       api.interceptors.response.eject(responseInterceptor);
     };
-  }, [navigate]);
+  }, []);
 
   const isAuthenticated = !!token;
 

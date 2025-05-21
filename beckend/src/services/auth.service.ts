@@ -33,7 +33,7 @@ export const registerUser = async ({
 
   // create access and refresh tokens
   const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "30s",
   });
   const refreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, {
     expiresIn: "30d",
@@ -61,7 +61,7 @@ export const login = async ({ email, password }: LoginParams) => {
 
   // create access and refresh token
   const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "30s",
   });
   const refreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, {
     expiresIn: "30d",
@@ -96,7 +96,7 @@ export const refreshAccessToken = async (refreshToken: string) => {
   }
 
   const accessToken = jwt.sign({ userId: user._id }, ACCESS_TOKEN_SECRET, {
-    expiresIn: "15m",
+    expiresIn: "30s",
   });
   const newRefreshToken = jwt.sign({ userId: user._id }, REFRESH_TOKEN_SECRET, {
     expiresIn: "30d",
