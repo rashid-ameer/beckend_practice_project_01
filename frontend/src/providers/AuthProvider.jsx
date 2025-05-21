@@ -54,7 +54,6 @@ const AuthProvider = ({ children }) => {
           try {
             const res = await api.get("/auth/refresh");
             setToken(res.data.accessToken);
-            console.log(res.data.accessToken);
             originalRequest.headers.Authorization = `Bearer ${res.data.accessToken}`;
             originalRequest.retry = true;
             return api(originalRequest);
